@@ -66,7 +66,7 @@ const Upload = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Model File Input */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">Model File (.pkl)</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Model File (.pkl or .joblib)</label>
             <div 
               onClick={() => modelInputRef.current?.click()}
               className={`border-2 border-dashed rounded-card p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${
@@ -77,7 +77,7 @@ const Upload = () => {
                 type="file" 
                 ref={modelInputRef} 
                 className="hidden" 
-                accept=".pkl"
+                accept=".pkl,.joblib"
                 onChange={(e) => handleFileChange(e, setModelFile)}
               />
               {modelFile ? (
@@ -90,7 +90,7 @@ const Upload = () => {
                 <>
                   <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
                   <p className="text-sm font-medium text-gray-900">Click to upload or drag and drop</p>
-                  <p className="text-xs text-gray-500 mt-1">Scikit-learn model file (.pkl)</p>
+                  <p className="text-xs text-gray-500 mt-1">Scikit-learn model file (.pkl or .joblib)</p>
                 </>
               )}
             </div>

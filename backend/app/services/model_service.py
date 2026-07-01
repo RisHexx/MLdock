@@ -17,10 +17,17 @@ def upload_model(
     """Upload a model file and metadata, validate, store on disk, create DB record."""
 
     # 0a. Validate model file extension
-    if not model_file.filename or not model_file.filename.endswith(".pkl"):
+    if not model_file.filename:
         raise HTTPException(
             status_code=400,
-            detail="Model file must be a .pkl file (scikit-learn joblib format)",
+            detail="Model file must be a .pkl or .joblib file (scikit-learn joblib format)",
+        )
+
+    _, file_ext = os.path.splitext(model_file.filename.lower())
+    if file_ext not in (".pkl", ".joblib"):
+        raise HTTPException(
+            status_code=400,
+            detail="Model file must be a .pkl or .joblib file (scikit-learn joblib format)",
         )
 
     # 0b. Validate model file size
@@ -49,7 +56,7 @@ def upload_model(
     model_dir = os.path.join(settings.STORAGE_PATH, metadata["name"])
     os.makedirs(model_dir, exist_ok=True)
 
-    model_file_path = os.path.join(model_dir, "model.pkl")
+    model_file_path = os.path.join(model_dir, f"model{file_ext}")
     metadata_file_path = os.path.join(model_dir, "metadata.json")
 
     try:

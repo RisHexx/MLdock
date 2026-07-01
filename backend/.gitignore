@@ -1,0 +1,33 @@
+# Environments
+.env
+.venv
+venv/
+ENV/
+env.bak/
+venv.bak/
+storage/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Data / Model Storage
+storage/
+*.pkl
+*.model
+
+# Databases
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# Pytest / Coverage
+.pytest_cache/
+.coverage
+htmlcov/

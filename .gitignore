@@ -1,0 +1,16 @@
+# General OS files
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Root environment variables
+.env
+.env.local
+
+# Logs
+*.log

@@ -7,7 +7,7 @@ from app.schemas.ml_model import ModelResponse, ModelListResponse, ModelStatusUp
 from app.services.model_service import (
     upload_model, list_models, get_model, delete_model, toggle_model_status
 )
-from app.services.prediction_service import unload_model
+from app.services.model_manager import model_manager
 
 router = APIRouter(prefix="/models", tags=["Models"])
 
@@ -96,9 +96,6 @@ def remove_model(
     current_user: User = Depends(get_current_user),
 ):
     """Delete a model and its files."""
-    model = get_model(db, model_id)
-    if model:
-        unload_model(model.name)
     success = delete_model(db, model_id)
     if not success:
         raise HTTPException(status_code=404, detail="Model not found")
@@ -119,7 +116,7 @@ def update_status(
 
     # Unload if disabled
     if request.status == "inactive":
-        unload_model(model.name)
+        model_manager.unload_model(model.name)
 
     return ModelResponse(
         id=str(model.id),

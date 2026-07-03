@@ -7,7 +7,7 @@ from app.models.ml_model import MLModel
 from app.models.api_key import APIKey
 from app.models.prediction_log import PredictionLog
 from app.schemas.dashboard import DashboardStats
-from app.services.prediction_service import get_loaded_model_count, get_memory_usage_mb
+from app.services.model_manager import model_manager
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
@@ -26,8 +26,8 @@ def get_stats(
     return DashboardStats(
         total_models=total_models,
         active_models=active_models,
-        loaded_models=get_loaded_model_count(),
+        loaded_models=model_manager.get_loaded_model_count(),
         total_api_keys=total_api_keys,
         total_predictions=total_predictions,
-        memory_usage_mb=get_memory_usage_mb(),
+        memory_usage_mb=model_manager.get_memory_usage_mb(),
     )

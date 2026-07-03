@@ -6,6 +6,9 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { UploadCloud, File, AlertCircle, CheckCircle2 } from 'lucide-react';
 
+const SUPPORTED_MODEL_EXTENSIONS = ['.pkl', '.joblib', '.pt', '.pth', '.h5', '.keras', '.onnx'];
+const SUPPORTED_MODEL_EXTENSIONS_LABEL = SUPPORTED_MODEL_EXTENSIONS.join(', ');
+
 const Upload = () => {
   const [modelFile, setModelFile] = useState(null);
   const [metadataFile, setMetadataFile] = useState(null);
@@ -66,7 +69,9 @@ const Upload = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Model File Input */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">Model File (.pkl or .joblib)</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              Model File ({SUPPORTED_MODEL_EXTENSIONS_LABEL})
+            </label>
             <div 
               onClick={() => modelInputRef.current?.click()}
               className={`border-2 border-dashed rounded-card p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${
@@ -77,7 +82,7 @@ const Upload = () => {
                 type="file" 
                 ref={modelInputRef} 
                 className="hidden" 
-                accept=".pkl,.joblib"
+                accept={SUPPORTED_MODEL_EXTENSIONS.join(',')}
                 onChange={(e) => handleFileChange(e, setModelFile)}
               />
               {modelFile ? (
@@ -90,7 +95,7 @@ const Upload = () => {
                 <>
                   <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
                   <p className="text-sm font-medium text-gray-900">Click to upload or drag and drop</p>
-                  <p className="text-xs text-gray-500 mt-1">Scikit-learn model file (.pkl or .joblib)</p>
+                  <p className="text-xs text-gray-500 mt-1">Supported model files: {SUPPORTED_MODEL_EXTENSIONS_LABEL}</p>
                 </>
               )}
             </div>

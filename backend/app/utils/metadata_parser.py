@@ -1,7 +1,8 @@
 import json
 import re
 
-SUPPORTED_FRAMEWORKS = ["sklearn"]
+from app.drivers.registry import registered_frameworks
+
 SUPPORTED_TYPES = ["integer", "float", "string", "boolean"]
 
 
@@ -29,11 +30,12 @@ def parse_and_validate_metadata(content: str) -> dict:
             "starting and ending with a letter or digit."
         )
 
-    # Validate framework
+    # Validate framework against registered drivers
     framework = metadata["framework"]
-    if framework not in SUPPORTED_FRAMEWORKS:
+    supported = registered_frameworks()
+    if framework not in supported:
         raise ValueError(
-            f"Unsupported framework: '{framework}'. Supported: {SUPPORTED_FRAMEWORKS}"
+            f"Unsupported framework: '{framework}'. Supported: {supported}"
         )
 
     # Validate input_schema

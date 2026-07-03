@@ -1,12 +1,13 @@
 import os
 import shutil
 import json
-import joblib
 from sqlalchemy.orm import Session
 from fastapi import UploadFile, HTTPException
 from app.config import settings
 from app.models.ml_model import MLModel
 from app.utils.metadata_parser import parse_and_validate_metadata
+from app.drivers.registry import get_driver
+from app.services.model_manager import model_manager
 
 
 def upload_model(
@@ -16,21 +17,38 @@ def upload_model(
 ) -> MLModel:
     """Upload a model file and metadata, validate, store on disk, create DB record."""
 
-    # 0a. Validate model file extension
+    # 1. Read and validate metadata first (need framework to resolve driver)
+    try:
+        metadata_content = metadata_file.file.read().decode("utf-8")
+        metadata = parse_and_validate_metadata(metadata_content)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid metadata: {str(e)}")
+
+    # 2. Resolve driver from framework
+    framework = metadata["framework"]
+    try:
+        driver = get_driver(framework)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # 3. Validate model file extension via driver
     if not model_file.filename:
         raise HTTPException(
             status_code=400,
-            detail="Model file must be a .pkl or .joblib file (scikit-learn joblib format)",
+            detail=f"Model file must have one of these extensions: {driver.supported_extensions()}",
         )
 
     _, file_ext = os.path.splitext(model_file.filename.lower())
-    if file_ext not in (".pkl", ".joblib"):
+    if file_ext not in driver.supported_extensions():
         raise HTTPException(
             status_code=400,
-            detail="Model file must be a .pkl or .joblib file (scikit-learn joblib format)",
+            detail=(
+                f"Invalid file extension '{file_ext}' for framework '{framework}'. "
+                f"Supported: {driver.supported_extensions()}"
+            ),
         )
 
-    # 0b. Validate model file size
+    # 4. Validate model file size
     model_file.file.seek(0, 2)  # Seek to end
     file_size_mb = model_file.file.tell() / (1024 * 1024)
     model_file.file.seek(0)  # Seek back to start
@@ -40,19 +58,12 @@ def upload_model(
             detail=f"Model file is {file_size_mb:.1f} MB, exceeds limit of {settings.MAX_MODEL_SIZE_MB} MB",
         )
 
-    # 1. Read and validate metadata
-    try:
-        metadata_content = metadata_file.file.read().decode("utf-8")
-        metadata = parse_and_validate_metadata(metadata_content)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid metadata: {str(e)}")
-
-    # 2. Check for duplicate model name
+    # 5. Check for duplicate model name
     existing = db.query(MLModel).filter(MLModel.name == metadata["name"]).first()
     if existing:
         raise HTTPException(status_code=409, detail=f"Model '{metadata['name']}' already exists")
 
-    # 3. Create storage directory
+    # 6. Create storage directory
     model_dir = os.path.join(settings.STORAGE_PATH, metadata["name"])
     os.makedirs(model_dir, exist_ok=True)
 
@@ -60,26 +71,26 @@ def upload_model(
     metadata_file_path = os.path.join(model_dir, "metadata.json")
 
     try:
-        # 4. Save model file to disk
+        # 7. Save model file to disk
         model_file.file.seek(0)
         with open(model_file_path, "wb") as f:
             shutil.copyfileobj(model_file.file, f)
 
-        # 5. Validate model loads successfully
+        # 8. Validate model loads successfully via driver
         try:
-            loaded = joblib.load(model_file_path)
-            del loaded
+            driver.validate_model_file(model_file_path)
         except Exception as e:
             raise HTTPException(
                 status_code=400,
                 detail=f"Failed to load model file: {str(e)}"
             )
 
-        # 6. Save metadata file to disk
+        # 9. Persist model_path into metadata and save to disk
+        metadata["model_path"] = model_file_path
         with open(metadata_file_path, "w") as f:
             json.dump(metadata, f, indent=2)
 
-        # 7. Create DB record
+        # 10. Create DB record
         ml_model = MLModel(
             name=metadata["name"],
             display_name=metadata["display_name"],
@@ -124,6 +135,9 @@ def delete_model(db: Session, model_id: str) -> bool:
     model = db.query(MLModel).filter(MLModel.id == model_id).first()
     if not model:
         return False
+
+    # Unload from cache via ModelManager (driver handles resource cleanup)
+    model_manager.unload_model(model.name)
 
     # Remove files from disk
     model_dir = os.path.join(settings.STORAGE_PATH, model.name)

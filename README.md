@@ -1,20 +1,21 @@
 # MLDock
 
-MLDock is a self-hosted model serving platform designed to simplify the deployment of machine learning models. It provides a lightweight infrastructure for ML engineers to expose `scikit-learn` models as secure REST APIs without writing boilerplate backend code.
+MLDock is a self-hosted model serving platform designed to simplify the deployment of machine learning models. It provides a lightweight infrastructure for ML engineers to expose multiple model frameworks as secure REST APIs without writing boilerplate backend code.
 
 ## Core Features
 
-- **Automated API Generation:** Upload a serialized model (`.pkl`) alongside a metadata schema, and MLDock dynamically provisions a validation-backed REST endpoint.
+- **Automated API Generation:** Upload a serialized model and metadata schema, and MLDock dynamically provisions a validation-backed REST endpoint.
 - **In-Memory Caching:** Models are lazy-loaded into memory upon first request to minimize startup latency and optimize memory footprint.
 - **Access Control:** Includes built-in JWT authentication for the dashboard and HMAC-hashed API keys for endpoint access.
 - **Observability:** Tracks endpoint latency, memory usage, and request status codes.
 - **Interactive Playground:** Test predictions and input schemas directly from the UI.
+- **Multi-Framework Drivers:** Supports scikit-learn, PyTorch, TensorFlow/Keras, and ONNX models when the relevant runtime is installed.
 
 ## Architecture
 
 - **Backend:** FastAPI, SQLAlchemy, PostgreSQL
 - **Frontend:** React, Redux Toolkit, Tailwind CSS, Vite
-- **ML Stack:** `scikit-learn`, `joblib`
+- **ML Stack:** `scikit-learn`, `joblib`, `torch`, `tensorflow`, `onnxruntime`
 - **Security:** `passlib` (bcrypt), `python-jose`
 
 ## Getting Started
@@ -51,6 +52,13 @@ npm run dev
 
 Models require a `metadata.json` file defining the expected schema. MLDock uses this to automatically generate Pydantic validation for the endpoint.
 
+Supported model file extensions depend on the selected framework:
+
+- scikit-learn: `.pkl`, `.joblib`
+- PyTorch: `.pt`, `.pth`
+- TensorFlow/Keras: `.h5`, `.keras`
+- ONNX: `.onnx`
+
 Example `metadata.json`:
 
 ```json
@@ -73,3 +81,5 @@ Example `metadata.json`:
 ```
 
 *Supported schema types: `integer`, `float`, `string`, `boolean`.*
+
+The `framework` field should match the model type you upload. MLDock uses that value to select the appropriate runtime driver and validate the uploaded model file.

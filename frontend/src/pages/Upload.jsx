@@ -6,7 +6,7 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { UploadCloud, File, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-const SUPPORTED_MODEL_EXTENSIONS = ['.pkl', '.joblib', '.pt', '.pth', '.h5', '.keras', '.onnx'];
+const SUPPORTED_MODEL_EXTENSIONS = ['.pkl', '.joblib', '.pt', '.h5', '.keras', '.onnx'];
 const SUPPORTED_MODEL_EXTENSIONS_LABEL = SUPPORTED_MODEL_EXTENSIONS.join(', ');
 
 const Upload = () => {

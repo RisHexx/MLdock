@@ -55,7 +55,7 @@ Models require a `metadata.json` file defining the expected schema. MLDock uses 
 Supported model file extensions depend on the selected framework:
 
 - scikit-learn: `.pkl`, `.joblib`
-- PyTorch: `.pt`, `.pth`
+- PyTorch: `.pt`
 - TensorFlow/Keras: `.h5`, `.keras`
 - ONNX: `.onnx`
 

@@ -11,6 +11,7 @@ from app.routers import auth, api_keys, models, predict, dashboard, logs, health
 async def lifespan(app: FastAPI):
     # Startup: create tables and storage directory
     init_db()
+    #exist of true means if folder already there do nothing
     os.makedirs(settings.STORAGE_PATH, exist_ok=True)
     yield
     # Shutdown: cleanup if needed
@@ -20,8 +21,13 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     description="Self-hosted AI Model Serving Platform",
+    # this call the lifespan function which manages what to do when app starts and close
+    # means When starting or stopping, run the lifespan() function.
     lifespan=lifespan,
 )
+
+
+#middleware -> Every request passes through it.
 
 # CORS — allow frontend
 app.add_middleware(
@@ -33,6 +39,7 @@ app.add_middleware(
 )
 
 # Mount routers
+#feature of FastAPI -  include_router() is used to split your API into multiple modules instead of putting every endpoint in a single file.
 app.include_router(auth.router)
 app.include_router(api_keys.router)
 app.include_router(models.router)

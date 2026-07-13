@@ -1,13 +1,20 @@
 from fastapi import Depends, HTTPException, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+#Only imported for type hints.
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.services.auth_service import decode_token
 from app.services.key_service import validate_api_key
 
+
+#That object reads Authorization: Bearer abc123
 security = HTTPBearer()
 
+
+#HTTPAuthorizationCredentials is a A simple container with:
+# scheme -> Bearer
+# credentials -> actual Token
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
@@ -30,7 +37,10 @@ def get_current_user(
     return user
 
 
+#Header() is similar to Depends()
+#Instead of saying Call another function" it says "Read this value from the HTTP headers.
 def verify_api_key(
+    #The ... (Ellipsis) means the header is required.
     x_api_key: str = Header(..., alias="X-API-Key"),
     db: Session = Depends(get_db),
 ) -> bool:

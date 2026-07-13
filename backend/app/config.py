@@ -1,5 +1,9 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+#you can use python-dotenv directly. But config.py gives you validation, type conversion, defaults, and one centralized place to access configuration.
 
+from pydantic_settings import BaseSettings, SettingsConfigDict
+#just like baseclass in pydantic
+#BaseSettings, Instead of validating API data, it validates values from .env
+#SettingsConfigDict -> From Where to load environment variables
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
@@ -8,7 +12,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://mldock:mldock_secret@localhost:5432/mldock"
 
     # JWT
-    SECRET_KEY: str = "mldock-dev-secret-change-in-production"
+    SECRET_KEY: str = "mldock-dev-secret"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
 

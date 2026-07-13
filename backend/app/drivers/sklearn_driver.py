@@ -1,5 +1,3 @@
-"""Scikit-learn driver — loads joblib/pickle models and runs .predict()."""
-
 import joblib
 from typing import Any
 

@@ -15,13 +15,18 @@ class PyTorchDriver(BaseDriver):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = torch.load(
             metadata["model_path"],
+            #This tells PyTorch where to place the tensors after loading.
             map_location=device,
+            #weights_only=False means: Load (deserialize) the entire saved Python object (e.g., the complete model), not just its weights.
             weights_only=False,
         )
         if hasattr(model, "eval"):
             model.eval()
         return model
 
+
+
+    # A tensor is the basic data structure used by PyTorch to store and process data. You can think of it as a multidimensional array (similar to a NumPy array) that can run efficiently on CPUs or GPUs.
     def predict(self, model: Any, inputs: dict, input_schema: dict) -> Any:
         """Convert inputs to a tensor and run inference under no_grad."""
         import torch

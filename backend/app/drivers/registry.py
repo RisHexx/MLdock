@@ -1,18 +1,22 @@
-"""Driver registry — maps framework names to BaseDriver instances.
+#This file stores a mapping between framework names and driver instances. Other parts of the application (like ModelManager) use this file whenever they need a driver.
 
-This is the single lookup point used by ModelManager and the upload pipeline
-to resolve the correct driver for a given framework string.
-"""
 
+#__future__ lets you use newer Python features even if you're running an older version.
 from __future__ import annotations
+# annotations postpones evaluating type hints.
+#Python stores the annotation as a string internally and evaluates it only when needed.
 
 from typing import TYPE_CHECKING
 
+#import happens only during type checking in code editor not while running.
+#we cant norammly import becuse it may cause circular import issue
 if TYPE_CHECKING:
     from app.drivers.base import BaseDriver
 
 
-_registry: dict[str, "BaseDriver"] = {}
+_registry: dict[str, "BaseDriver"] = {} #initailly the dictionary is empty.
+#Keys are strings.
+#Values are BaseDriver objects.
 
 
 def register_driver(framework: str, driver: "BaseDriver") -> None:
@@ -25,18 +29,9 @@ def register_driver(framework: str, driver: "BaseDriver") -> None:
     _registry[framework] = driver
 
 
+
+#Resolve the driver for the given framework.
 def get_driver(framework: str) -> "BaseDriver":
-    """Resolve the driver for the given framework.
-
-    Args:
-        framework: The framework identifier from model metadata.
-
-    Returns:
-        The registered BaseDriver instance.
-
-    Raises:
-        ValueError: If no driver is registered for the framework.
-    """
     if framework not in _registry:
         available = list(_registry.keys())
         raise ValueError(

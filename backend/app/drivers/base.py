@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+# An abstract class is a class that cannot be instantiated directly. Its purpose is to define a common interface and shared behavior for subclasses.
 
 class BaseDriver(ABC):
     """Interface that all framework drivers must implement.
@@ -54,6 +55,7 @@ class BaseDriver(ABC):
         """
         ...
 
+    #Checks whether a model file is valid before saving or using it.
     @abstractmethod
     def validate_model_file(self, file_path: str) -> None:
         """Quick-check that a model file on disk is loadable.

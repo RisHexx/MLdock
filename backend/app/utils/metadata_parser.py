@@ -38,11 +38,14 @@ def parse_and_validate_metadata(content: str) -> dict:
             f"Unsupported framework: '{framework}'. Supported: {supported}"
         )
 
+
     # Validate input_schema
     input_schema = metadata["input_schema"]
+    #check that Is it actually a dictionary? or its not empty because ml model need atleast 1 input
     if not isinstance(input_schema, dict) or len(input_schema) == 0:
         raise ValueError("input_schema must be a non-empty object")
 
+    #iterating and checking if input schema field type is supported or not
     for field_name, field_type in input_schema.items():
         if field_type not in SUPPORTED_TYPES:
             raise ValueError(

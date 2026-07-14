@@ -1,10 +1,13 @@
 from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
+#Passlib is a Python library for securely hashing passwords.
 from jose import jwt, JWTError
+#python-jose is used for JWT (JSON Web Token).
 from sqlalchemy.orm import Session
 from app.config import settings
 from app.models.user import User
 
+#creates a password hashing object -> deprecated auto means if in future i change the scheme old passowrd still works
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 

@@ -2,6 +2,7 @@ import os
 import shutil
 import json
 from sqlalchemy.orm import Session
+#UploadFile -> Represents an uploaded file.
 from fastapi import UploadFile, HTTPException
 from app.config import settings
 from app.models.ml_model import MLModel
@@ -49,8 +50,17 @@ def upload_model(
         )
 
     # 4. Validate model file size
+
+    #seek(0) -> cursor at start 
+    # seek(0, 0) = Go to the start
+    # seek(0, 1) = Stay at the current position
+    # seek(0, 2) = Go to the end [1]
     model_file.file.seek(0, 2)  # Seek to end
+
+    #model_file.file.tell() -> tells number of bytes which than we convert to mb
     file_size_mb = model_file.file.tell() / (1024 * 1024)
+
+    #moving cursor back to start
     model_file.file.seek(0)  # Seek back to start
     if file_size_mb > settings.MAX_MODEL_SIZE_MB:
         raise HTTPException(

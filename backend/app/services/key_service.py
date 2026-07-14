@@ -9,9 +9,14 @@ def generate_api_key() -> str:
     return f"mld_{secrets.token_urlsafe(32)}"
 
 
+
+#Strings in Python are Unicode. Hash functions work on bytes, not strings.
+#encode() -> string into bytes using UTF-8 encoding.
 def hash_key(key: str) -> str:
     """SHA-256 hash of the API key for storage."""
     return hashlib.sha256(key.encode()).hexdigest()
+
+#.hexdigest() converts hash object to a readable hexadecimal string.
 
 
 def create_api_key(db: Session, name: str) -> tuple[APIKey, str]:

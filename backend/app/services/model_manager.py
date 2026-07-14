@@ -5,8 +5,11 @@ models. Controllers should call model_manager.predict() and never load models
 directly.
 """
 
+
+#use to measure how long prediction takes
 import time
 import numpy as np
+#psutil lets Python inspect the current process.
 import psutil
 from typing import Any
 
@@ -23,6 +26,7 @@ class ModelManager:
 
     def __init__(self) -> None:
         # model_name -> (loaded_model_object, framework_string)
+        #run when we initialize this class we know as its constructor
         self._cache: dict[str, tuple[Any, str]] = {}
 
     # ------------------------------------------------------------------
@@ -49,6 +53,7 @@ class ModelManager:
         Returns the cached instance if the model is already loaded.
         """
         if model.name in self._cache:
+            #  model_name -> (loaded_model_object, framework_string)
             return self._cache[model.name][0]
 
         driver = get_driver(model.framework)
@@ -70,6 +75,7 @@ class ModelManager:
 
     def unload_model(self, model_name: str) -> None:
         """Unload a model via its driver and remove from cache."""
+        #finding entry by model name - model_name -> (loaded_model_object, framework_string)
         entry = self._cache.pop(model_name, None)
         if entry is not None:
             loaded_model, framework = entry

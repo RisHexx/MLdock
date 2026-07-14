@@ -19,6 +19,8 @@ _registry: dict[str, "BaseDriver"] = {} #initailly the dictionary is empty.
 #Values are BaseDriver objects.
 
 
+
+#in __init__.py i used this function to register the drivers
 def register_driver(framework: str, driver: "BaseDriver") -> None:
     """Register a driver instance for a framework name.
 

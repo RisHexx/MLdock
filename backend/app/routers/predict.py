@@ -14,7 +14,8 @@ def run_prediction(
     request: PredictionRequest,
     db: Session = Depends(get_db),
     _: bool = Depends(verify_api_key),
+    #we dont use this variable at all thats why _ if apikey not valid we raise exception and controller never runs
 ):
-    """Run a prediction on a deployed model. Requires X-API-Key header."""
+    
     result = model_manager.predict(db, model_name, request.input)
     return PredictionResponse(**result)

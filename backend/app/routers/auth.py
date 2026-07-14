@@ -18,7 +18,7 @@ def check_setup(db: Session = Depends(get_db)):
     """Check if the admin account has been set up."""
     return SetupCheckResponse(is_setup=is_setup_complete(db))
 
-
+#This creates the first admin account.
 @router.post("/setup", response_model=TokenResponse)
 def setup_admin(request: SetupRequest, db: Session = Depends(get_db)):
     """Create the first admin account. Only works when no users exist."""
@@ -28,6 +28,7 @@ def setup_admin(request: SetupRequest, db: Session = Depends(get_db)):
     user = create_admin(db, request.username, request.password)
     token = create_access_token({"sub": str(user.id)})
     return TokenResponse(access_token=token)
+
 
 
 @router.post("/login", response_model=TokenResponse)

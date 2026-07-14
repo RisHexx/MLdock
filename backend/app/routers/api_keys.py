@@ -6,9 +6,13 @@ from app.models.user import User
 from app.schemas.api_key import APIKeyCreate, APIKeyResponse, APIKeyCreated
 from app.services.key_service import create_api_key, list_api_keys, revoke_api_key
 
+
+#tags is mainly for documentation
 router = APIRouter(prefix="/api-keys", tags=["API Keys"])
 
-
+#response_model=SetupCheckResponse
+#This tells FastAPI what the response should look like.
+#Even if your function accidentally returns extra fields, FastAPI filters them.
 @router.post("", response_model=APIKeyCreated)
 def generate_key(
     request: APIKeyCreate,

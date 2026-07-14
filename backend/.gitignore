@@ -31,3 +31,5 @@ storage/
 .pytest_cache/
 .coverage
 htmlcov/
+
+BACKEND_COMPLETE_EXPLANATION.md

@@ -15,12 +15,6 @@ const Setup = () => {
     dispatch(checkSetup());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (isSetupComplete) {
-      navigate('/login');
-    }
-  }, [isSetupComplete, navigate]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     dispatch(clearError());

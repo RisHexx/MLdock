@@ -26,7 +26,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Clear token and redirect to login if unauthorized
       localStorage.removeItem('token');
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/setup') {
+      const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
+      if (pathname !== '/login' && pathname !== '/setup') {
         window.location.href = '/login';
       }
     }

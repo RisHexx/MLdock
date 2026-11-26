@@ -23,7 +23,9 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql://mldock:mldock_secret@postgres:5432/mldock
-      SECRET_KEY: mldock-production-secret-change-me
+      # Leave unset to auto-generate a random key persisted in the storage volume,
+      # or set SECRET_KEY in your shell / .env file.
+      SECRET_KEY: ${SECRET_KEY:-}
       STORAGE_PATH: /app/storage
     volumes:
       - model_storage:/app/storage

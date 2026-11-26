@@ -20,17 +20,28 @@ class TensorFlowDriver(BaseDriver):
 
         features = [inputs[field] for field in input_schema]
         input_array = np.array([features], dtype=np.float32)
-        output = model.predict(input_array, verbose=0)
+        # For a single sample, calling the model directly is much faster than
+        # model.predict(), which sets up a full batching pipeline on every call.
+        output = model(input_array, training=False)
 
+        if hasattr(output, "numpy"):
+            output = output.numpy()
         if hasattr(output, "tolist"):
             return output.tolist()
         return output
 
     def unload(self, model: Any) -> None:
-        """Clear the Keras session and delete the model."""
+        """Nothing to do here — see free_memory()."""
+        return None
+
+    def free_memory(self) -> None:
+        """Reset Keras global state.
+
+        clear_session() affects every Keras model in the process, so ModelManager
+        only calls this after the last TensorFlow model has been unloaded.
+        """
         import tensorflow as tf
 
-        del model
         tf.keras.backend.clear_session()
 
     def validate_model_file(self, file_path: str) -> None:
@@ -39,7 +50,10 @@ class TensorFlowDriver(BaseDriver):
 
         loaded = tf.keras.models.load_model(file_path)
         del loaded
-        tf.keras.backend.clear_session()
+        # No clear_session() here: it would reset Keras state for TF models that
+        # are already loaded and serving predictions.
+        import gc
+        gc.collect()
 
     def supported_extensions(self) -> list[str]:
         return [".h5", ".keras"]

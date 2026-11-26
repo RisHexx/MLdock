@@ -1,17 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { uploadModel, resetUploadStatus } from '../store/slices/modelsSlice';
+import { uploadModel, resetUploadStatus, MAX_MODEL_SIZE_MB } from '../store/slices/modelsSlice';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { UploadCloud, File, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-const SUPPORTED_MODEL_EXTENSIONS = ['.pkl', '.joblib', '.pt', '.h5', '.keras', '.onnx'];
+const SUPPORTED_MODEL_EXTENSIONS = ['.pkl', '.joblib', '.pt', '.pth', '.h5', '.keras', '.onnx'];
 const SUPPORTED_MODEL_EXTENSIONS_LABEL = SUPPORTED_MODEL_EXTENSIONS.join(', ');
 
 const Upload = () => {
   const [modelFile, setModelFile] = useState(null);
   const [metadataFile, setMetadataFile] = useState(null);
+  const [sizeError, setSizeError] = useState(null);
+  const [progress, setProgress] = useState(0);
   const modelInputRef = useRef(null);
   const metadataInputRef = useRef(null);
 
@@ -25,9 +27,10 @@ const Upload = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!modelFile || !metadataFile) return;
+    if (!modelFile || !metadataFile || sizeError) return;
 
-    const resultAction = await dispatch(uploadModel({ modelFile, metadataFile }));
+    setProgress(0);
+    const resultAction = await dispatch(uploadModel({ modelFile, metadataFile, onProgress: setProgress }));
     if (uploadModel.fulfilled.match(resultAction)) {
       setTimeout(() => navigate('/models'), 1500);
     }
@@ -39,6 +42,24 @@ const Upload = () => {
     }
   };
 
+  // Reject oversized model files immediately instead of uploading them only to fail on the server
+  const handleModelFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    dispatch(resetUploadStatus());
+    if (file.size > MAX_MODEL_SIZE_MB * 1024 * 1024) {
+      setModelFile(null);
+      setSizeError(
+        `"${file.name}" is ${(file.size / (1024 * 1024)).toFixed(1)} MB. Maximum allowed size is ${MAX_MODEL_SIZE_MB} MB.`
+      );
+    } else {
+      setSizeError(null);
+      setModelFile(file);
+    }
+    // allow re-selecting the same file after an error
+    e.target.value = '';
+  };
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8 flex items-center justify-between">
@@ -47,6 +68,16 @@ const Upload = () => {
           <p className="text-sm text-gray-500 mt-1">Deploy a new model to MlDock</p>
         </div>
       </div>
+
+      {sizeError && (
+        <div className="mb-6 bg-red-50 text-red-600 p-4 rounded-card text-sm flex items-start border border-red-100">
+          <AlertCircle className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-semibold">File Too Large</p>
+            <p className="mt-1">{sizeError}</p>
+          </div>
+        </div>
+      )}
 
       {uploadStatus === 'failed' && (
         <div className="mb-6 bg-red-50 text-red-600 p-4 rounded-card text-sm flex items-start border border-red-100">
@@ -83,7 +114,7 @@ const Upload = () => {
                 ref={modelInputRef} 
                 className="hidden" 
                 accept={SUPPORTED_MODEL_EXTENSIONS.join(',')}
-                onChange={(e) => handleFileChange(e, setModelFile)}
+                onChange={handleModelFileChange}
               />
               {modelFile ? (
                 <>
@@ -96,6 +127,7 @@ const Upload = () => {
                   <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
                   <p className="text-sm font-medium text-gray-900">Click to upload or drag and drop</p>
                   <p className="text-xs text-gray-500 mt-1">Supported model files: {SUPPORTED_MODEL_EXTENSIONS_LABEL}</p>
+                  <p className="text-xs text-gray-500">Max size: {MAX_MODEL_SIZE_MB} MB</p>
                 </>
               )}
             </div>
@@ -133,6 +165,18 @@ const Upload = () => {
             </div>
           </div>
 
+          {uploadStatus === 'loading' && (
+            <div>
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span>{progress < 100 ? 'Uploading...' : 'Processing on server...'}</span>
+                <span>{progress}%</span>
+              </div>
+              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+              </div>
+            </div>
+          )}
+
           <div className="pt-4 flex justify-end gap-3">
             <Button type="button" variant="ghost" onClick={() => navigate('/models')}>
               Cancel
@@ -140,7 +184,7 @@ const Upload = () => {
             <Button 
               type="submit" 
               variant="primary" 
-              disabled={!modelFile || !metadataFile || uploadStatus === 'loading' || uploadStatus === 'succeeded'}
+              disabled={!modelFile || !metadataFile || !!sizeError || uploadStatus === 'loading' || uploadStatus === 'succeeded'}
             >
               {uploadStatus === 'loading' ? 'Deploying...' : 'Deploy Model'}
             </Button>

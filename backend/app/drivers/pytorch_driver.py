@@ -54,10 +54,17 @@ class PyTorchDriver(BaseDriver):
         return output
 
     def unload(self, model: Any) -> None:
-        """Delete model and free GPU memory if applicable."""
+        """Nothing to do here — memory is freed in free_memory() once the reference is gone.
+
+        (Calling torch.cuda.empty_cache() here would be useless: ModelManager still
+        holds a reference to the model while this method runs.)
+        """
+        return None
+
+    def free_memory(self) -> None:
+        """Return cached GPU memory to the device after models were unloaded."""
         import torch
 
-        del model
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
@@ -71,6 +78,8 @@ class PyTorchDriver(BaseDriver):
             weights_only=False,
         )
         del loaded
+        import gc
+        gc.collect()
 
     def supported_extensions(self) -> list[str]:
         return [".pt", ".pth"]

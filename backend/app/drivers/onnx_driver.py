@@ -4,6 +4,16 @@ from typing import Any
 
 from app.drivers.base import BaseDriver
 
+# Map ONNX tensor element types to numpy dtypes (models exported from sklearn
+# often use float32, but some expect double or int64 — sending the wrong one errors).
+_ONNX_DTYPES = {
+    "tensor(float)": "float32",
+    "tensor(double)": "float64",
+    "tensor(int64)": "int64",
+    "tensor(int32)": "int32",
+    "tensor(bool)": "bool",
+}
+
 
 class OnnxDriver(BaseDriver):
     """Driver for ONNX models using onnxruntime."""
@@ -19,10 +29,11 @@ class OnnxDriver(BaseDriver):
         import numpy as np
 
         features = [inputs[field] for field in input_schema]
-        input_array = np.array([features], dtype=np.float32)
 
-        # ONNX models declare their input names — use the first one
-        input_name = model.get_inputs()[0].name
+        # ONNX models declare their input names and element types — use the first input
+        model_input = model.get_inputs()[0]
+        input_name = model_input.name
+        input_array = np.array([features], dtype=_ONNX_DTYPES.get(model_input.type, np.float32))
         output = model.run(None, {input_name: input_array})
 
         # output is a list of arrays, one per model output
@@ -31,8 +42,8 @@ class OnnxDriver(BaseDriver):
         return output
 
     def unload(self, model: Any) -> None:
-        """Release the inference session."""
-        del model
+        """Nothing to do — the session is freed once ModelManager drops its reference."""
+        return None
 
     def validate_model_file(self, file_path: str) -> None:
         """Verify the file can be loaded as an ONNX session."""

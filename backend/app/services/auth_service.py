@@ -52,6 +52,8 @@ def create_admin(db: Session, username: str, password: str) -> User:
 def authenticate_user(db: Session, username: str, password: str) -> User | None:
     user = db.query(User).filter(User.username == username).first()
     if not user:
+        # Still run a bcrypt check so response time doesn't reveal whether the username exists.
+        pwd_context.dummy_verify()
         return None
     if not verify_password(password, user.password_hash):
         return None

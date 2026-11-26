@@ -1,3 +1,4 @@
+import uuid
 from fastapi import Depends, HTTPException, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 #Only imported for type hints.
@@ -9,7 +10,17 @@ from app.services.key_service import validate_api_key
 
 
 #That object reads Authorization: Bearer abc123
-security = HTTPBearer()
+# auto_error=False so a missing/malformed header gives 401 (not FastAPI's default 403),
+# which is what the frontend's axios interceptor listens for to redirect to /login.
+security = HTTPBearer(auto_error=False)
+
+
+def _unauthorized(detail: str) -> HTTPException:
+    return HTTPException(
+        status_code=401,
+        detail=detail,
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 #HTTPAuthorizationCredentials is a A simple container with:
@@ -17,22 +28,26 @@ security = HTTPBearer()
 # credentials -> actual Token
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
     db: Session = Depends(get_db),
 ) -> User:
     """JWT authentication dependency for dashboard routes."""
-    token = credentials.credentials
-    payload = decode_token(token)
-    if payload is None:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    if credentials is None or credentials.scheme.lower() != "bearer":
+        raise _unauthorized("Not authenticated")
 
-    user_id = payload.get("sub")
-    if user_id is None:
-        raise HTTPException(status_code=401, detail="Invalid token payload")
+    payload = decode_token(credentials.credentials)
+    if payload is None:
+        raise _unauthorized("Invalid or expired token")
+
+    # sub must be a valid UUID; otherwise querying the UUID column would raise a 500.
+    try:
+        user_id = uuid.UUID(str(payload.get("sub")))
+    except (ValueError, TypeError):
+        raise _unauthorized("Invalid token payload")
 
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
-        raise HTTPException(status_code=401, detail="User not found")
+        raise _unauthorized("User not found")
 
     return user
 

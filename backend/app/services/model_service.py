@@ -64,7 +64,7 @@ def upload_model(
     model_file.file.seek(0)  # Seek back to start
     if file_size_mb > settings.MAX_MODEL_SIZE_MB:
         raise HTTPException(
-            status_code=400,
+            status_code=413,
             detail=f"Model file is {file_size_mb:.1f} MB, exceeds limit of {settings.MAX_MODEL_SIZE_MB} MB",
         )
 

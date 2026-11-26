@@ -55,6 +55,14 @@ class BaseDriver(ABC):
         """
         ...
 
+    def free_memory(self) -> None:
+        """Release framework-wide memory (e.g. GPU caches) after unloading.
+
+        Called by ModelManager after the last model of this framework has been
+        unloaded and garbage collected. Default: nothing to do.
+        """
+        return None
+
     #Checks whether a model file is valid before saving or using it.
     @abstractmethod
     def validate_model_file(self, file_path: str) -> None:

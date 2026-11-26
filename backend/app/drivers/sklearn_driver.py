@@ -17,8 +17,8 @@ class SklearnDriver(BaseDriver):
         return model.predict([features])
 
     def unload(self, model: Any) -> None:
-        """No-op for sklearn — garbage collection handles cleanup."""
-        del model
+        """No-op for sklearn — ModelManager drops the reference and GC frees it."""
+        return None
 
     def validate_model_file(self, file_path: str) -> None:
         """Verify the file can be loaded by joblib."""

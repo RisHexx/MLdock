@@ -49,6 +49,15 @@ def create_admin(db: Session, username: str, password: str) -> User:
     return user
 
 
+def change_password(db: Session, user: User, current_password: str, new_password: str) -> bool:
+    """Update the user's password. Returns False if current_password is wrong."""
+    if not verify_password(current_password, user.password_hash):
+        return False
+    user.password_hash = hash_password(new_password)
+    db.commit()
+    return True
+
+
 def authenticate_user(db: Session, username: str, password: str) -> User | None:
     user = db.query(User).filter(User.username == username).first()
     if not user:

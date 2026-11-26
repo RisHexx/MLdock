@@ -2,10 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.auth import (
-    SetupRequest, LoginRequest, TokenResponse, UserResponse, SetupCheckResponse
+    SetupRequest, LoginRequest, TokenResponse, UserResponse, SetupCheckResponse,
+    ChangePasswordRequest,
 )
 from app.services.auth_service import (
-    is_setup_complete, create_admin, authenticate_user, create_access_token
+    is_setup_complete, create_admin, authenticate_user, create_access_token,
+    change_password,
 )
 from app.middleware.auth import get_current_user
 from app.models.user import User
@@ -46,3 +48,18 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 def get_me(current_user: User = Depends(get_current_user)):
     """Get current authenticated user info."""
     return UserResponse(id=str(current_user.id), username=current_user.username)
+
+
+@router.post("/change-password")
+def update_password(
+    request: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Change the current user's password (requires the current password)."""
+    if request.new_password == request.current_password:
+        raise HTTPException(status_code=400, detail="New password must be different from the current one")
+    # 400, not 401: a wrong *current password* shouldn't make the frontend log the user out
+    if not change_password(db, current_user, request.current_password, request.new_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    return {"detail": "Password updated"}

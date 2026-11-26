@@ -112,7 +112,7 @@ const Models = () => {
                             className="fixed inset-0 z-10" 
                             onClick={() => setActionMenuId(null)}
                           />
-                          <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-card shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20 focus:outline-none py-1">
+                          <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-card shadow-lg bg-card ring-1 ring-black ring-opacity-5 z-20 focus:outline-none py-1">
                             <Link
                               to={`/models/${model.id}`}
                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

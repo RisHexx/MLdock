@@ -15,7 +15,7 @@ export const Thead = ({ children }) => (
 );
 
 export const Tbody = ({ children }) => (
-  <tbody className="bg-white divide-y divide-border">
+  <tbody className="bg-card divide-y divide-border">
     {children}
   </tbody>
 );

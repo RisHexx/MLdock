@@ -40,7 +40,7 @@ const Setup = () => {
 
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-md rounded-card shadow-soft border border-border p-8">
+      <div className="bg-card w-full max-w-md rounded-card shadow-soft border border-border p-8">
         <div className="flex flex-col items-center mb-8">
           <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4">
             <Database className="w-6 h-6" />

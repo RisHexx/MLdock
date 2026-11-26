@@ -11,6 +11,7 @@ import ModelDetail from './pages/ModelDetail';
 import ApiKeys from './pages/ApiKeys';
 import Playground from './pages/Playground';
 import Logs from './pages/Logs';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/api-keys" element={<ApiKeys />} />
             <Route path="/playground" element={<Playground />} />
             <Route path="/logs" element={<Logs />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
         </Route>
 

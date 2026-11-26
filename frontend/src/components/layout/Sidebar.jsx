@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Database, Key, Activity, Settings } from 'lucide-react';
+import { LayoutDashboard, Database, Key, Activity, ScrollText, Settings } from 'lucide-react';
 
 const Sidebar = () => {
   const navItems = [
@@ -8,11 +8,12 @@ const Sidebar = () => {
     { name: 'Models', path: '/models', icon: Database },
     { name: 'API Keys', path: '/api-keys', icon: Key },
     { name: 'Playground', path: '/playground', icon: Activity },
-    { name: 'Logs', path: '/logs', icon: Settings },
+    { name: 'Logs', path: '/logs', icon: ScrollText },
+    { name: 'Settings', path: '/settings', icon: Settings },
   ];
 
   return (
-    <div className="w-64 bg-white border-r border-border h-screen flex flex-col fixed left-0 top-0">
+    <div className="w-64 bg-card border-r border-border h-screen flex flex-col fixed left-0 top-0">
       <div className="h-16 flex items-center px-6 border-b border-border">
         <div className="flex items-center gap-2 text-primary">
           <Database className="w-6 h-6" />

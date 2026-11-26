@@ -6,6 +6,14 @@
 
 @layer base {
   body {
-    @apply bg-white text-gray-900 font-sans antialiased;
+    @apply bg-surface text-gray-900 font-sans antialiased;
+  }
+
+  /* Form fields use the card color instead of the browser default
+     (which is a neutral gray in dark mode). Utility classes still override this. */
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),
+  select,
+  textarea {
+    @apply bg-card;
   }
 }

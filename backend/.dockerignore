@@ -1,0 +1,14 @@
+# Keep local-only files out of the image (and out of the build context upload).
+# .env in particular must never be baked into a published image.
+venv/
+.venv/
+env/
+.env
+storage/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.log
+*.md
+Dockerfile
+.dockerignore

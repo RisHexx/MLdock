@@ -1,0 +1,13 @@
+# For developers: build the images from this source tree instead of pulling
+# the published ones.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up --build -d
+
+services:
+  backend:
+    build: ./backend
+    image: mldock-backend:local
+
+  frontend:
+    build: ./frontend
+    image: mldock-frontend:local

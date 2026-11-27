@@ -1,8 +1,16 @@
-version: "3.9"
+# MLDock — self-hosted ML model serving.
+#
+# Install:  docker compose up -d      then open http://localhost
+# Upgrade:  docker compose pull && docker compose up -d
+#
+# Uses prebuilt images from GitHub Container Registry. Pin a release with
+# MLDOCK_VERSION=1.0.0 (in a .env file next to this one); default is latest.
+# Developers building from source: see docker-compose.build.yml
 
 services:
   postgres:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: mldock
       POSTGRES_PASSWORD: mldock_secret
@@ -18,7 +26,8 @@ services:
       retries: 5
 
   backend:
-    build: ./backend
+    image: ghcr.io/rishexx/mldock-backend:${MLDOCK_VERSION:-latest}
+    restart: unless-stopped
     ports:
       - "8000:8000"
     environment:
@@ -34,7 +43,8 @@ services:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
+    image: ghcr.io/rishexx/mldock-frontend:${MLDOCK_VERSION:-latest}
+    restart: unless-stopped
     ports:
       - "80:80"
     depends_on:

@@ -1,0 +1,9 @@
+# node_modules is reinstalled inside the image (and may contain Windows-only binaries)
+node_modules/
+dist/
+.env
+.env.*
+*.log
+*.md
+Dockerfile
+.dockerignore

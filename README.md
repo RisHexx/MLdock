@@ -1,4 +1,4 @@
-# MLDock
+# MLdock
 
 MLDock is a self-hosted model serving platform designed to simplify the deployment of machine learning models. It provides a lightweight infrastructure for ML engineers to expose multiple model frameworks as secure REST APIs without writing boilerplate backend code.
 

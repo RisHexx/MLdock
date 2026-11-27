@@ -109,6 +109,13 @@ Supported model file extensions depend on the selected framework:
 - TensorFlow/Keras: `.h5`, `.keras`
 - ONNX: `.onnx`
 
+> **Note on PyTorch files:** `.pt` and `.pth` are the same format; what matters is what was saved inside.
+>
+> - A full model saved with `torch.save(model, "x.pth")` works. The catch is that the model's class code must be importable on the server, or the upload fails.
+> - A weights-only file saved with `torch.save(model.state_dict(), "x.pth")` doesn't work. This is the most common kind of `.pth` file.
+>
+> For the most reliable results, export PyTorch models to ONNX and upload them with `"framework": "onnx"`.
+
 Example `metadata.json`:
 
 ```json
